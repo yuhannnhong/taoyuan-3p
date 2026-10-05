@@ -6,6 +6,8 @@
   >
     <!-- 状态栏 -->
     <StatusBar @request-sleep="showSleepConfirm = true" />
+    <!-- 家庭動態 -->
+    <FamilyFeed />
 
     <div class="flex space-x-1.5">
       <!-- 同一地点组内翻页（不产生移动耗时）。窄屏下只压缩面板名，箭头始终保留 -->
@@ -605,6 +607,7 @@
   import Divider from '@/components/game/Divider.vue'
   import MobileMapMenu from '@/components/game/MobileMapMenu.vue'
   import StatusBar from '@/components/game/StatusBar.vue'
+  import FamilyFeed from '@/components/game/FamilyFeed.vue'
   import EventDialog from '@/components/game/EventDialog.vue'
   import HeartEventDialog from '@/components/game/HeartEventDialog.vue'
   import PerkSelectDialog from '@/components/game/PerkSelectDialog.vue'
