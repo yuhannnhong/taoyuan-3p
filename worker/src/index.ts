@@ -1,6 +1,7 @@
 import { WorldDO } from './durable-object'
 import { resolveActor } from './auth'
-import type { Env, ApiResponse, ActorId } from './types'
+import { worldSummary, worldFarm, worldInventory, worldAnimals } from './read-api'
+import type { Env, ApiResponse } from './types'
 
 export { WorldDO }
 
@@ -18,6 +19,12 @@ function json(body: ApiResponse, status = 200): Response {
   })
 }
 
+async function loadWorldData(env: Env): Promise<Record<string, any> | null> {
+  const res = await forwardToDO(env, new Request(doUrl('/load'), { method: 'GET' }))
+  const body = await res.json() as any
+  return body.ok ? (body.world ?? null) : null
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     if (request.method === 'OPTIONS') {
@@ -32,7 +39,7 @@ export default {
     const url = new URL(request.url)
     const path = url.pathname
 
-    // --- Step 4: 存檔 CRUD（透傳到 Durable Object）---
+    // --- Step 4: 存檔 CRUD ---
     if (path === '/world' && request.method === 'GET') {
       return forwardToDO(env, new Request(doUrl('/load'), { method: 'GET' }))
     }
@@ -45,12 +52,27 @@ export default {
       }))
     }
 
-    // --- Step 5 接口預留：唯讀 API ---
-    // GET /world/summary
-    // GET /world/farm
-    // GET /world/inventory
-    // GET /world/animals
-    // 實作在 Step 5，會在 Worker 內載入 Pinia store 解析存檔後回傳結構化資料
+    // --- Step 5: 唯讀 API ---
+    if (request.method === 'GET' && path.startsWith('/world/')) {
+      const data = await loadWorldData(env)
+      if (!data) {
+        return json({ ok: false, message: '尚無存檔' }, 404)
+      }
+
+      const sub = path.slice('/world/'.length)
+      switch (sub) {
+        case 'summary':
+          return json({ ok: true, message: '世界摘要', result: worldSummary(data, actor) })
+        case 'farm':
+          return json({ ok: true, message: '農場狀態', result: worldFarm(data) })
+        case 'inventory':
+          return json({ ok: true, message: '背包內容', result: worldInventory(data) })
+        case 'animals':
+          return json({ ok: true, message: '動物狀態', result: worldAnimals(data) })
+        default:
+          return json({ ok: false, message: `未知子路徑: ${sub}` }, 404)
+      }
+    }
 
     // --- Step 6 接口預留：動作 API ---
     // POST /act/water    { plots: [...] }
@@ -58,7 +80,6 @@ export default {
     // POST /act/plant    { plot, seedId }
     // POST /act/feed-animals
     // POST /act/gift     { npcId, itemId }
-    // 實作在 Step 6，在 Worker 內用 Pinia store 執行遊戲邏輯後存回 DO
 
     return json({ ok: false, message: `未知路徑: ${path}` }, 404)
   },
