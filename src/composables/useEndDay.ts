@@ -19,6 +19,7 @@ import { useBreedingStore } from '@/stores/useBreedingStore'
 import { useHanhaiStore } from '@/stores/useHanhaiStore'
 import { useFishPondStore } from '@/stores/useFishPondStore'
 import { useTutorialStore } from '@/stores/useTutorialStore'
+import { useFamilyStore, MEMBER_NAMES } from '@/stores/useFamilyStore'
 import { useSettingsStore } from '@/stores/useSettingsStore'
 import { useHiddenNpcStore } from '@/stores/useHiddenNpcStore'
 import { useMiningStore } from '@/stores/useMiningStore'
@@ -112,7 +113,7 @@ const NPC_RECIPE_MAP: {
   { npcId: 'chen_bo', level: 'bestFriend', recipeId: 'camel_milk_tea' }
 ]
 
-/** 结婚食谱映射 */
+// @ts-ignore kept for future expansion
 const MARRIAGE_RECIPE_MAP: Record<string, string> = {
   liu_niang: 'phoenix_cake',
   a_shi: 'molten_hotpot',
@@ -176,19 +177,11 @@ const checkRecipeUnlocks = () => {
     }
   }
 
-  // 结婚食谱
-  const spouse = npcStore.getSpouse()
-  if (spouse) {
-    const marriageRecipe = MARRIAGE_RECIPE_MAP[spouse.npcId]
-    if (marriageRecipe) {
-      if (cookingStore.unlockRecipe(marriageRecipe)) {
-        const spouseName = getNpcName(spouse.npcId)
-        addLog(`${spouseName}教你了新的料理秘方！`)
-      }
-    }
-    // 通用结婚食谱：孔雀宴
+  // 家庭食谱（原婚姻食谱，現由家庭系統觸發）
+  const familyStore = useFamilyStore()
+  if (familyStore.hasSpouses) {
     if (cookingStore.unlockRecipe('peacock_feast')) {
-      addLog(`婚后生活解锁了新食谱：孔雀宴！`)
+      addLog(`家人一起解锁了新食谱：孔雀宴！`)
     }
   }
 
@@ -564,19 +557,17 @@ export const handleEndDay = () => {
   for (const msg of helperFeedResult.messages) addLog(msg)
   const helperFeedSuccess = helperFeedResult.allFed
 
-  const spouse = npcStore.getSpouse()
+  const familyStore2 = useFamilyStore()
   let spouseFedSuccess = false
-  if (spouse && !helperFeedSuccess) {
-    const bonusChanceEve = spouse.friendship >= 2500 ? 0.1 : 0
-    if (Math.random() < 0.4 + bonusChanceEve) {
+  if (familyStore2.hasSpouses && !helperFeedSuccess) {
+    if (Math.random() < 0.4) {
+      const spouseName = MEMBER_NAMES[familyStore2.spouses[Math.floor(Math.random() * familyStore2.spouses.length)]!]!
       const result = animalStore.feedAll()
       if (result.fedCount > 0) {
-        const spouseDefEve = getNpcById(spouse.npcId)
-        addLog(`${spouseDefEve?.name ?? '配偶'}帮你喂了所有牲畜。`)
+        addLog(`${spouseName}帮你喂了所有牲畜。`)
         spouseFedSuccess = result.noFeedCount === 0
       } else if (result.noFeedCount > 0) {
-        const spouseDefEve = getNpcById(spouse.npcId)
-        addLog(`${spouseDefEve?.name ?? '配偶'}想帮你喂牲畜，但草料不足。`)
+        addLog(`${spouseName}想帮你喂牲畜，但草料不足。`)
       }
     }
   }
@@ -771,41 +762,33 @@ export const handleEndDay = () => {
   const helperMorningResult = npcStore.processDailyHelpers(['water', 'harvest', 'weed', 'collect'])
   for (const msg of helperMorningResult.messages) addLog(msg)
 
-  // 晨间工作：配偶浇水/做饭/收获
-  if (spouse) {
-    const spouseDef = getNpcById(spouse.npcId)
-    const spouseName = spouseDef?.name ?? '配偶'
-    const bonusChance = spouse.friendship >= 2500 ? 0.1 : 0
-    const highBond = spouse.friendship >= 3000 ? 0.15 : 0
+  // 晨間工作：家人幫忙澆水/做飯/收穫
+  if (familyStore2.hasSpouses) {
+    const spouseName = MEMBER_NAMES[familyStore2.spouses[Math.floor(Math.random() * familyStore2.spouses.length)]!]!
 
-    // 浇水：50% + bonus + highBond，3-6块
-    if (Math.random() < 0.5 + bonusChance + highBond) {
+    if (Math.random() < 0.5) {
       const unwatered = farmStore.plots.filter(p => (p.state === 'planted' || p.state === 'growing') && !p.watered)
       const count = Math.min(unwatered.length, 3 + Math.floor(Math.random() * 4))
       for (let i = 0; i < count; i++) farmStore.waterPlot(unwatered[i]!.id)
       if (count > 0) addLog(`${spouseName}一早帮你浇了${count}块地。`)
     }
 
-    // 做饭：30% + bonus（好感>=2000）
-    if (spouse.friendship >= 2000 && Math.random() < 0.3 + bonusChance) {
+    if (Math.random() < 0.3) {
       const foods = ['food_rice_ball', 'food_congee', 'food_steamed_bun', 'food_honey_tea', 'food_stir_fry', 'food_dumpling']
       const food = foods[Math.floor(Math.random() * foods.length)]!
       inventoryStore.addItem(food)
       addLog(`${spouseName}一早做了一份${getItemById(food)?.name ?? '食物'}。`)
     }
 
-    // 收获：30%（好感>=3000），最多3块，背包满时不收
-    if (spouse.friendship >= 3000 && !inventoryStore.isFull && Math.random() < 0.3 + bonusChance) {
+    if (!inventoryStore.isFull && Math.random() < 0.3) {
       const harvestable = farmStore.plots.filter(p => p.state === 'harvestable')
       const harvestCount = Math.min(harvestable.length, 3)
       let harvested = 0
-      // 多茬作物收满后地块清空，单独记一条
       const exhaustedNames: string[] = []
       for (let i = 0; i < harvestCount; i++) {
         if (inventoryStore.isFull) break
         const hResult = farmStore.harvestPlot(harvestable[i]!.id)
         if (hResult.cropId) {
-          // 地块等级：每级额外 +1，与主产出同为普通品质
           inventoryStore.addItem(hResult.cropId, 1 + hResult.bonus, 'normal')
           harvested++
           if (hResult.exhausted) exhaustedNames.push(getCropById(hResult.cropId)?.name ?? hResult.cropId)

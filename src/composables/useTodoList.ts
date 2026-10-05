@@ -8,7 +8,7 @@ import { useQuestStore } from '@/stores/useQuestStore'
 import { useInventoryStore } from '@/stores/useInventoryStore'
 import { useFishPondStore } from '@/stores/useFishPondStore'
 import { useBreedingStore } from '@/stores/useBreedingStore'
-import { NPCS, getNpcById } from '@/data/npcs'
+import { NPCS } from '@/data/npcs'
 import { getProcessingRecipeById, PROCESSING_MACHINES } from '@/data/processing'
 import { getStoryQuestById } from '@/data/storyQuests'
 import type { PanelKey } from './useNavigation'
@@ -253,18 +253,7 @@ export const useTodoList = () => {
       })
     }
 
-    // 配偶与子女
-    const spouse = npcStore.getSpouse()
-    if (spouse && !spouse.talkedToday) {
-      const name = getNpcById(spouse.npcId) ? npcStore.getNpcDisplayName(spouse.npcId) : '伴侣'
-      list.push({
-        id: 'social-spouse',
-        category: 'social',
-        text: `还没和${name}说上话`,
-        urgency: 'normal',
-        panel: 'cottage'
-      })
-    }
+    // 子女
     const childrenToVisit = npcStore.children.filter(c => !c.interactedToday).length
     if (childrenToVisit > 0) {
       list.push({

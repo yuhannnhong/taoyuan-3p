@@ -24,9 +24,9 @@
   import { ref, computed } from 'vue'
   import type { SeasonEventDef } from '@/data/events'
   import { useGameStore } from '@/stores/useGameStore'
-  import { useNpcStore } from '@/stores/useNpcStore'
   import { usePlayerStore } from '@/stores/usePlayerStore'
-  import { getNpcById } from '@/data/npcs'
+  import { useFamilyStore } from '@/stores/useFamilyStore'
+  import { MEMBER_NAMES } from '@/stores/useFamilyStore'
   import Button from '@/components/game/Button.vue'
 
   const props = defineProps<{
@@ -38,18 +38,16 @@
   }>()
 
   const gameStore = useGameStore()
-  const npcStore = useNpcStore()
+  const familyStore = useFamilyStore()
   const playerStore = usePlayerStore()
 
-  /** 配偶名（未婚则为空） */
   const spouseName = computed(() => {
-    const spouse = npcStore.getSpouse()
-    return spouse ? (getNpcById(spouse.npcId)?.name ?? '') : ''
+    if (!familyStore.hasSpouses) return ''
+    return familyStore.spouses.map(id => MEMBER_NAMES[id]).join('、')
   })
 
-  /** 已婚且该节日提供了成家版本时，改用成家版文案 */
   const narrative = computed(() => {
-    if (spouseName.value && props.event.narrativeMarried) return props.event.narrativeMarried
+    if (familyStore.hasSpouses && props.event.narrativeMarried) return props.event.narrativeMarried
     return props.event.narrative
   })
 

@@ -575,7 +575,8 @@
     BEDTIME_PROMPT_HOUR,
     formatTime
   } from '@/data/timeConstants'
-  import { getNpcById, getItemById, getCropById } from '@/data'
+  import { getItemById, getCropById } from '@/data'
+  import { useFamilyStore, MEMBER_NAMES } from '@/stores/useFamilyStore'
   import { CHEST_DEFS } from '@/data/items'
   import { useGameClock } from '@/composables/useGameClock'
   import { useAudio } from '@/composables/useAudio'
@@ -929,9 +930,9 @@
 
   /** 子女提议回应 */
   const proposalSpouseName = computed(() => {
-    const spouse = npcStore.getSpouse()
-    if (!spouse || !getNpcById(spouse.npcId)) return '配偶'
-    return npcStore.getNpcDisplayName(spouse.npcId)
+    const familyStore = useFamilyStore()
+    if (!familyStore.hasSpouses) return '家人'
+    return familyStore.spouses.map(id => MEMBER_NAMES[id]).join('、')
   })
 
   const handleChildProposalResponse = (response: 'accept' | 'decline' | 'wait') => {

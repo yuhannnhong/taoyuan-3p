@@ -30,7 +30,7 @@ import {
   Waves,
   Handshake
 } from 'lucide-vue-next'
-import { useNpcStore } from '@/stores/useNpcStore'
+import { useFamilyStore } from '@/stores/useFamilyStore'
 
 export type PanelKey =
   | 'farm'
@@ -70,7 +70,7 @@ export const TABS: {
     key: 'cottage',
     label: '小屋',
     icon: Home,
-    getIcon: () => (useNpcStore().getSpouse() ? Heart : Home)
+    getIcon: () => (useFamilyStore().hasSpouses ? Heart : Home)
   },
   { key: 'home', label: '设施', icon: Building },
   { key: 'breeding', label: '育种', icon: FlaskConical },

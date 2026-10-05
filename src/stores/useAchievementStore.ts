@@ -15,6 +15,7 @@ import { useGameStore } from './useGameStore'
 import { useMuseumStore } from './useMuseumStore'
 import { useGuildStore } from './useGuildStore'
 import { useHiddenNpcStore } from './useHiddenNpcStore'
+import { useFamilyStore } from './useFamilyStore'
 
 export const useAchievementStore = defineStore('achievement', () => {
   const playerStore = usePlayerStore()
@@ -172,7 +173,7 @@ export const useAchievementStore = defineStore('achievement', () => {
           return level === 'friendly' || level === 'bestFriend'
         })
       case 'married':
-        return npcStore.getSpouse() !== null
+        return useFamilyStore().hasSpouses
       case 'hasChild':
         return npcStore.children.length > 0
       case 'monstersKilled':

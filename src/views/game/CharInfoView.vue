@@ -285,12 +285,12 @@
     </div>
 
     <!-- 家庭 -->
-    <div v-if="spouseInfo" class="border border-accent/20 rounded-xs p-2">
+    <div v-if="familyStore.hasSpouses" class="border border-accent/20 rounded-xs p-2">
       <p class="text-xs text-muted mb-1.5">家庭</p>
       <div class="flex flex-col space-y-0.5">
-        <div class="flex items-center justify-between">
-          <span class="text-xs text-muted">配偶</span>
-          <span class="text-xs text-accent">{{ spouseInfo.name }}</span>
+        <div v-for="sid in familyStore.spouses" :key="sid" class="flex items-center justify-between">
+          <span class="text-xs text-muted">伴侣</span>
+          <span class="text-xs text-accent">{{ MEMBER_NAMES[sid] }}</span>
         </div>
         <div v-for="child in npcStore.children" :key="child.id" class="flex items-center justify-between">
           <span class="text-xs text-muted">{{ child.name }}</span>
@@ -307,10 +307,11 @@
   import { useGameStore, SEASON_NAMES } from '@/stores/useGameStore'
   import { useInventoryStore } from '@/stores/useInventoryStore'
   import { useNpcStore } from '@/stores/useNpcStore'
+  import { useFamilyStore, MEMBER_NAMES } from '@/stores/useFamilyStore'
   import { usePlayerStore } from '@/stores/usePlayerStore'
   import { useSkillStore } from '@/stores/useSkillStore'
   import { useWalletStore } from '@/stores/useWalletStore'
-  import { TOOL_NAMES, TIER_NAMES, getNpcById } from '@/data'
+  import { TOOL_NAMES, TIER_NAMES } from '@/data'
   import { getWeaponById, getEnchantmentById } from '@/data/weapons'
   import { getRingById } from '@/data/rings'
   import { getHatById } from '@/data/hats'
@@ -327,6 +328,7 @@
   const skillStore = useSkillStore()
   const walletStore = useWalletStore()
   const npcStore = useNpcStore()
+  const familyStore = useFamilyStore()
   const gameStore = useGameStore()
 
   // === 身份 ===
@@ -573,12 +575,6 @@
   const unlockedWalletItems = computed(() => WALLET_ITEMS.filter(w => walletStore.has(w.id)))
 
   // === 家庭 ===
-  const spouseInfo = computed(() => {
-    const spouseState = npcStore.getSpouse()
-    if (!spouseState) return null
-    const npcDef = getNpcById(spouseState.npcId)
-    return npcDef ? { name: npcStore.getNpcDisplayName(spouseState.npcId) } : null
-  })
 
   const CHILD_STAGE_NAMES: Record<ChildStage, string> = {
     baby: '婴儿',

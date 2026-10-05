@@ -518,6 +518,7 @@
   import { useInventoryStore } from '@/stores/useInventoryStore'
   import { useMuseumStore } from '@/stores/useMuseumStore'
   import { useNpcStore } from '@/stores/useNpcStore'
+  import { useFamilyStore } from '@/stores/useFamilyStore'
   import { useQuestStore } from '@/stores/useQuestStore'
   import { useSecretNoteStore } from '@/stores/useSecretNoteStore'
   import { useShopStore } from '@/stores/useShopStore'
@@ -932,7 +933,7 @@
         target = npcStore.npcStates.length
         break
       case 'married':
-        return npcStore.getSpouse() ? 100 : 0
+        return useFamilyStore().hasSpouses ? 100 : 0
       case 'hasChild':
         return npcStore.children.length > 0 ? 100 : 0
       case 'allBundlesComplete':
@@ -1022,7 +1023,7 @@
         return `${friendlyCount}/${npcStore.npcStates.length}`
       }
       case 'married':
-        return npcStore.getSpouse() ? '已完成' : '未完成'
+        return useFamilyStore().hasSpouses ? '已完成' : '未完成'
       case 'hasChild':
         return npcStore.children.length > 0 ? '已完成' : '未完成'
       case 'allBundlesComplete':

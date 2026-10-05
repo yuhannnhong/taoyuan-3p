@@ -7,6 +7,7 @@ import { getNpcById } from '@/data/npcs'
 import { useInventoryStore } from './useInventoryStore'
 import { usePlayerStore } from './usePlayerStore'
 import { useNpcStore } from './useNpcStore'
+import { useFamilyStore } from './useFamilyStore'
 import { useAchievementStore } from './useAchievementStore'
 import { useSkillStore } from './useSkillStore'
 import { useShopStore } from './useShopStore'
@@ -265,10 +266,9 @@ export const useQuestStore = defineStore('quest', () => {
       case 'ownAnimals':
         return animalStore.animals.length >= (obj.target ?? 0)
       case 'married':
-        return npcStore.getSpouse() !== null
+        return useFamilyStore().hasSpouses
       case 'settleDown': {
-        // 在桃源乡扎下根：成家、结为知己，或与足够多的村民成为挚友——任选其一即可
-        if (npcStore.getSpouse() !== null) return true
+        if (useFamilyStore().hasSpouses) return true
         if (npcStore.npcStates.some(n => n.zhiji)) return true
         const bestFriends = npcStore.npcStates.filter(n => npcStore.getFriendshipLevel(n.npcId) === 'bestFriend').length
         return bestFriends >= (obj.target ?? 3)

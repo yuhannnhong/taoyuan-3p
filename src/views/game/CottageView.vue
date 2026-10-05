@@ -2,7 +2,7 @@
   <div>
     <h3 class="text-accent text-sm mb-3 flex items-center justify-between">
       <span>
-        <component :is="npcStore.getSpouse() ? Heart : Home" :size="14" class="inline" />
+        <component :is="familyStore.hasSpouses ? Heart : Home" :size="14" class="inline" />
         小屋
       </span>
       <button class="text-muted hover:text-accent transition-colors" @click="showCalendarModal = true">
@@ -28,134 +28,29 @@
     </div>
 
     <!-- 家人 -->
-    <div v-if="npcStore.getSpouse()" class="border border-accent/20 rounded-xs p-3 mb-4">
+    <div v-if="familyStore.hasSpouses" class="border border-accent/20 rounded-xs p-3 mb-4">
       <p class="text-sm text-accent mb-2">
         <Users :size="14" class="inline" />
         家人
       </p>
 
-      <!-- 配偶互动 -->
-      <div class="border border-accent/10 rounded-xs p-2 mb-2">
-        <div class="flex items-center justify-between mb-1.5">
-          <span class="text-xs text-accent">{{ spouseDisplayName }}</span>
+      <!-- 家庭成員 -->
+      <div v-for="sid in familyStore.spouses" :key="sid" class="border border-accent/10 rounded-xs p-2 mb-2">
+        <div class="flex items-center justify-between">
+          <span class="text-xs text-accent">{{ MEMBER_NAMES[sid] }}</span>
           <span class="text-[10px] text-danger">
             <Heart :size="10" class="inline" />
             伴侣
           </span>
         </div>
-        <div v-if="spouseDialogue" class="border border-accent/10 rounded-xs p-2 mb-1.5">
-          <p class="text-[10px] text-accent mb-0.5">「{{ spouseDisplayName }}」</p>
-          <p class="text-xs">{{ spouseDialogue }}</p>
-        </div>
-        <div class="flex space-x-1.5">
-          <Button
-            class="flex-1 justify-center py-0.5"
-            :icon="MessageCircle"
-            :icon-size="10"
-            :disabled="spouseState?.talkedToday"
-            @click="handleSpouseTalk"
-          >
-            {{ spouseState?.talkedToday ? '已聊天' : '聊天' }}
-          </Button>
-          <Button
-            class="flex-1 justify-center py-0.5"
-            :icon="Gift"
-            :icon-size="10"
-            :disabled="spouseState?.giftedToday || (spouseState?.giftsThisWeek ?? 0) >= 2"
-            @click="showSpouseGiftModal = true"
-          >
-            {{ spouseState?.giftedToday ? '已送礼' : (spouseState?.giftsThisWeek ?? 0) >= 2 ? '本周已满' : '送礼' }}
-          </Button>
-        </div>
       </div>
 
-      <!-- 提议通知 -->
-      <div v-if="npcStore.childProposalPending" class="border border-accent/30 rounded-xs p-2 mb-2">
-        <p class="text-xs text-accent mb-1.5">配偶有话想和你说……</p>
-        <Button class="w-full justify-center" @click="showChildProposalDialog">回应</Button>
-      </div>
-
-      <!-- 孕期面板 -->
-      <div v-if="npcStore.pregnancy" class="border border-success/20 rounded-xs p-2 mb-2">
-        <p class="text-xs text-success mb-2">孕期 · {{ PREGNANCY_STAGE_LABELS[npcStore.pregnancy.stage] }}</p>
-        <!-- 阶段进度条 -->
-        <div class="flex items-center space-x-1 mb-1.5">
-          <span class="text-[10px] text-muted w-8 shrink-0">进度</span>
-          <div class="flex-1 h-1.5 bg-bg rounded-xs border border-accent/10">
-            <div
-              class="h-full rounded-xs bg-success transition-all"
-              :style="{
-                width: Math.floor((npcStore.pregnancy.daysInStage / npcStore.pregnancy.stageDays) * 100) + '%'
-              }"
-            />
-          </div>
-          <span class="text-[10px] text-muted shrink-0">{{ npcStore.pregnancy.daysInStage }}/{{ npcStore.pregnancy.stageDays }}天</span>
-        </div>
-        <!-- 安产率条 -->
-        <div class="flex items-center space-x-1 mb-2">
-          <span class="text-[10px] text-muted w-8 shrink-0">安产</span>
-          <div class="flex-1 h-1.5 bg-bg rounded-xs border border-accent/10">
-            <div
-              class="h-full rounded-xs transition-all"
-              :class="npcStore.pregnancy.careScore >= 70 ? 'bg-success' : npcStore.pregnancy.careScore >= 40 ? 'bg-accent' : 'bg-danger'"
-              :style="{ width: npcStore.pregnancy.careScore + '%' }"
-            />
-          </div>
-          <span class="text-[10px] text-muted shrink-0">{{ npcStore.pregnancy.careScore }}%</span>
-        </div>
-        <!-- 阶段提示 -->
-        <p class="text-[10px] text-muted/60 mb-2">
-          {{ STAGE_TIPS[npcStore.pregnancy.stage] }}
+      <!-- 今日動態 -->
+      <div v-if="todayActions.length > 0" class="border border-accent/10 rounded-xs p-2 mb-2">
+        <p class="text-[10px] text-muted mb-1">今日動態</p>
+        <p v-for="(entry, i) in todayActions" :key="i" class="text-xs">
+          {{ MEMBER_NAMES[entry.actor] }} {{ entry.action }}
         </p>
-        <!-- 照料操作 -->
-        <div class="grid grid-cols-2 gap-1 mb-1">
-          <Button
-            class="py-0.5 px-1 text-[10px] justify-center"
-            :disabled="npcStore.pregnancy.giftedForPregnancy"
-            @click="handlePregnancyCare('gift')"
-          >
-            {{ npcStore.pregnancy.giftedForPregnancy ? '已送礼' : '送礼物' }}
-          </Button>
-          <Button
-            class="py-0.5 px-1 text-[10px] justify-center"
-            :disabled="npcStore.pregnancy.companionToday"
-            @click="handlePregnancyCare('companion')"
-          >
-            {{ npcStore.pregnancy.companionToday ? '已陪伴' : '陪伴聊天' }}
-          </Button>
-          <Button class="py-0.5 px-1 text-[10px] justify-center" @click="handlePregnancyCare('supplement')">服用补品</Button>
-          <Button
-            class="py-0.5 px-1 text-[10px] justify-center"
-            :disabled="npcStore.pregnancy.caredToday"
-            @click="handlePregnancyCare('rest')"
-          >
-            {{ npcStore.pregnancy.caredToday ? '已休息' : '安排休息' }}
-          </Button>
-        </div>
-        <!-- 医疗方案（待产期） -->
-        <div v-if="npcStore.pregnancy.stage === 'ready'" class="border border-accent/20 rounded-xs p-2 mt-2">
-          <p class="text-[10px] text-accent mb-1.5">选择接生方式</p>
-          <div v-if="!npcStore.pregnancy.medicalPlan" class="flex flex-col space-y-1">
-            <Button class="py-0.5 px-1 text-[10px] w-full justify-center" @click="handleChooseMedical('normal')">
-              普通接生（1000文 · 80%安全）
-            </Button>
-            <Button class="py-0.5 px-1 text-[10px] w-full justify-center" @click="handleChooseMedical('advanced')">
-              高级接生（5000文 · 95%安全）
-            </Button>
-            <Button class="py-0.5 px-1 text-[10px] w-full justify-center text-accent" @click="handleChooseMedical('luxury')">
-              豪华接生（15000文 · 100%安全）
-            </Button>
-          </div>
-          <p v-else class="text-[10px] text-success">已选择：{{ MEDICAL_LABELS[npcStore.pregnancy.medicalPlan] }}</p>
-        </div>
-      </div>
-
-      <!-- 无子女无孕期 -->
-      <div v-if="npcStore.children.length === 0 && !npcStore.pregnancy && !npcStore.childProposalPending">
-        <div class="flex flex-col items-center justify-center py-6 text-muted">
-          <Users :size="32" class="mb-2" />
-          <p class="text-xs">婚后生活安稳，也许将来会有小生命到来。</p>
-        </div>
       </div>
 
       <!-- 子女列表 -->
@@ -383,45 +278,6 @@
 
     <CalendarModal :open="showCalendarModal" @close="showCalendarModal = false" />
 
-    <!-- 配偶送礼弹窗 -->
-    <Transition name="panel-fade">
-      <div
-        v-if="showSpouseGiftModal"
-        class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4"
-        @click.self="showSpouseGiftModal = false"
-      >
-        <div class="game-panel max-w-sm w-full">
-          <div class="flex items-center justify-between mb-2">
-            <p class="text-sm text-accent">送礼给{{ spouseDisplayName }}</p>
-            <Button class="py-0 px-1" :icon="X" :icon-size="12" @click="showSpouseGiftModal = false" />
-          </div>
-          <div class="flex flex-col space-y-1 max-h-60 overflow-y-auto">
-            <div
-              v-for="item in spouseGiftableItems"
-              :key="item.itemId + item.quality"
-              class="flex items-center justify-between border border-accent/20 rounded-xs px-3 py-1.5 cursor-pointer hover:bg-accent/5"
-              @click="handleSpouseGift(item.itemId, item.quality)"
-            >
-              <span class="flex items-center space-x-1">
-                <span class="text-xs" :class="qualityTextClass(item.quality)">
-                  {{ getItemById(item.itemId)?.name }}
-                </span>
-                <span
-                  v-if="getSpouseGiftPref(item.itemId) !== 'neutral'"
-                  class="text-[10px]"
-                  :class="GIFT_PREF_CLASS[getSpouseGiftPref(item.itemId)]"
-                >
-                  {{ GIFT_PREF_LABELS[getSpouseGiftPref(item.itemId)] }}
-                </span>
-              </span>
-              <span class="text-xs text-muted">&times;{{ item.quantity }}</span>
-            </div>
-          </div>
-          <div v-if="spouseGiftableItems.length === 0" class="py-4 text-center text-xs text-muted">背包中没有可赠送的物品</div>
-        </div>
-      </div>
-    </Transition>
-
     <!-- 招募雇工弹窗 -->
     <Transition name="panel-fade">
       <div v-if="showHireModal" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4" @click.self="closeHireModal">
@@ -591,20 +447,19 @@
 
 <script setup lang="ts">
   import { computed, ref } from 'vue'
-  import { ArrowUp, Calendar, Gift, Hammer, Home, Heart, MessageCircle, UserPlus, Users, Wine, X } from 'lucide-vue-next'
-  import { useCookingStore } from '@/stores/useCookingStore'
+  import { ArrowUp, Calendar, Hammer, Home, Heart, UserPlus, Users, Wine, X } from 'lucide-vue-next'
   import { useGameStore } from '@/stores/useGameStore'
   import { useHomeStore } from '@/stores/useHomeStore'
   import { useInventoryStore } from '@/stores/useInventoryStore'
   import { useNpcStore } from '@/stores/useNpcStore'
+  import { useFamilyStore, MEMBER_NAMES } from '@/stores/useFamilyStore'
   import { useAchievementStore } from '@/stores/useAchievementStore'
   import { usePlayerStore } from '@/stores/usePlayerStore'
   import { getCombinedItemCount } from '@/composables/useCombinedInventory'
   import { getItemById, getNpcById } from '@/data'
   import { ACTION_TIME_COSTS } from '@/data/timeConstants'
-  import type { Quality, ChildStage, PregnancyStage, FarmHelperTask } from '@/types'
+  import type { Quality, ChildStage, FarmHelperTask } from '@/types'
   import { addLog } from '@/composables/useGameLog'
-  import { showChildProposal, triggerHeartEvent } from '@/composables/useDialogs'
   import { handleEndDay } from '@/composables/useEndDay'
   import Button from '@/components/game/Button.vue'
   import CalendarModal from '@/components/game/CalendarModal.vue'
@@ -613,13 +468,15 @@
   const inventoryStore = useInventoryStore()
   const gameStore = useGameStore()
   const npcStore = useNpcStore()
+  const familyStore = useFamilyStore()
   const playerStore = usePlayerStore()
+
+  const todayActions = computed(() => familyStore.getTodayActions(gameStore.day))
 
   const releaseConfirmChildId = ref<number | null>(null)
   const showUpgradeModal = ref(false)
   const showAgingModal = ref(false)
   const showCalendarModal = ref(false)
-  const showSpouseGiftModal = ref(false)
   const showHireModal = ref(false)
   const selectedHireTask = ref<FarmHelperTask>('water')
   const hireConfirmNpcId = ref<string | null>(null)
@@ -659,128 +516,11 @@
     dismissConfirmNpcId.value = null
   }
 
-  // === 配偶互动 ===
-
-  const spouseState = computed(() => npcStore.getSpouse())
-  const spouseDef = computed(() => (spouseState.value ? getNpcById(spouseState.value.npcId) : null))
-  const spouseDisplayName = computed(() => (spouseState.value ? npcStore.getNpcDisplayName(spouseState.value.npcId) : ''))
-  const spouseDialogue = ref<string | null>(null)
-
-  const handleSpouseTalk = () => {
-    if (!spouseState.value) return
-    if (gameStore.isPastBedtime) {
-      addLog('太晚了，该休息了。')
-      handleEndDay()
-      return
-    }
-    const result = npcStore.talkTo(spouseState.value.npcId)
-    if (result) {
-      spouseDialogue.value = result.message
-      addLog(`与${spouseDef.value?.name}聊天。(+${result.friendshipGain}好感)`)
-      const tr = gameStore.advanceTime(ACTION_TIME_COSTS.talk)
-      if (tr.message) addLog(tr.message)
-      if (tr.passedOut) {
-        handleEndDay()
-        return
-      }
-      const heartEvent = npcStore.checkHeartEvent(spouseState.value.npcId)
-      if (heartEvent) triggerHeartEvent(heartEvent)
-    }
-  }
-
-  type GiftPreference = 'loved' | 'liked' | 'hated' | 'neutral'
-
-  const getSpouseGiftPref = (itemId: string): GiftPreference => {
-    if (!spouseDef.value) return 'neutral'
-    if (spouseDef.value.lovedItems.includes(itemId)) return 'loved'
-    if (spouseDef.value.likedItems.includes(itemId)) return 'liked'
-    if (spouseDef.value.hatedItems.includes(itemId)) return 'hated'
-    return 'neutral'
-  }
-
-  const GIFT_PREF_LABELS: Record<GiftPreference, string> = {
-    loved: '最爱',
-    liked: '喜欢',
-    hated: '讨厌',
-    neutral: ''
-  }
-  const GIFT_PREF_CLASS: Record<GiftPreference, string> = {
-    loved: 'text-danger',
-    liked: 'text-success',
-    hated: 'text-muted',
-    neutral: ''
-  }
-  const GIFT_PREF_ORDER: Record<GiftPreference, number> = {
-    loved: 0,
-    liked: 1,
-    neutral: 2,
-    hated: 3
-  }
-
-  const spouseGiftableItems = computed(() => {
-    const filtered = inventoryStore.items.filter(i => {
-      const def = getItemById(i.itemId)
-      return def && def.category !== 'seed'
-    })
-    if (!spouseDef.value) return filtered
-    return [...filtered].sort((a, b) => GIFT_PREF_ORDER[getSpouseGiftPref(a.itemId)] - GIFT_PREF_ORDER[getSpouseGiftPref(b.itemId)])
-  })
-
-  const handleSpouseGift = (itemId: string, quality: Quality) => {
-    if (!spouseState.value) return
-    const cookingStore = useCookingStore()
-    const cookingGiftBonus = cookingStore.activeBuff?.type === 'giftBonus' ? cookingStore.activeBuff.value : 1
-    const ringGiftBonus = inventoryStore.getRingEffectValue('gift_friendship')
-    const giftMultiplier = cookingGiftBonus * (1 + ringGiftBonus)
-    const result = npcStore.giveGift(spouseState.value.npcId, itemId, giftMultiplier, quality)
-    if (result) {
-      const itemName = getItemById(itemId)?.name ?? itemId
-      const name = spouseDef.value?.name
-      if (result.gain > 0) {
-        addLog(`送给${name}${itemName}，${name}觉得${result.reaction}。(+${result.gain}好感)`)
-      } else if (result.gain < 0) {
-        addLog(`送给${name}${itemName}，${name}${result.reaction}这个……(${result.gain}好感)`)
-      } else {
-        addLog(`送给${name}${itemName}，${name}觉得${result.reaction}。`)
-      }
-      showSpouseGiftModal.value = false
-      const heartEvent = npcStore.checkHeartEvent(spouseState.value.npcId)
-      if (heartEvent) triggerHeartEvent(heartEvent)
-    }
-  }
-
-  const qualityTextClass = (q: Quality): string => {
-    if (q === 'fine') return 'text-quality-fine'
-    if (q === 'excellent') return 'text-quality-excellent'
-    if (q === 'supreme') return 'text-quality-supreme'
-    return ''
-  }
-
   const CHILD_STAGE_NAMES: Record<ChildStage, string> = {
     baby: '婴儿',
     toddler: '幼儿',
     child: '孩童',
     teen: '少年'
-  }
-
-  const PREGNANCY_STAGE_LABELS: Record<PregnancyStage, string> = {
-    early: '初期（需要营养）',
-    mid: '中期（需要陪伴）',
-    late: '后期（需要休息）',
-    ready: '待产期（准备迎接）'
-  }
-
-  const STAGE_TIPS: Record<PregnancyStage, string> = {
-    early: '孕初期需要注意营养，送些食物或补品效果最好。',
-    mid: '孕中期需要更多陪伴，多聊天可以大幅提升安产率。',
-    late: '孕后期要注意休息，让配偶好好休养。',
-    ready: '即将临盆，请选择接生方式并做好最后的准备。'
-  }
-
-  const MEDICAL_LABELS: Record<string, string> = {
-    normal: '普通接生',
-    advanced: '高级接生',
-    luxury: '豪华接生'
   }
 
   const AGEABLE_ITEMS = ['watermelon_wine', 'osmanthus_wine', 'peach_wine', 'jujube_wine', 'corn_wine', 'rice_vinegar']
@@ -849,21 +589,6 @@
     const result = npcStore.releaseChild(releaseConfirmChildId.value)
     addLog(result.message)
     releaseConfirmChildId.value = null
-  }
-
-  const showChildProposalDialog = () => {
-    showChildProposal()
-  }
-
-  const handlePregnancyCare = (action: 'gift' | 'companion' | 'supplement' | 'rest') => {
-    const result = npcStore.performPregnancyCare(action)
-    addLog(result.message)
-    if (result.careGain > 0) addLog(`安产率 +${result.careGain}%`)
-  }
-
-  const handleChooseMedical = (plan: 'normal' | 'advanced' | 'luxury') => {
-    const result = npcStore.chooseMedicalPlan(plan)
-    addLog(result.message)
   }
 
   const handleStartAgingFromModal = (itemId: string, quality: Quality) => {

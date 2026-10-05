@@ -29,6 +29,7 @@ import { useFishPondStore } from './useFishPondStore'
 import { useTutorialStore } from './useTutorialStore'
 import { useHiddenNpcStore } from './useHiddenNpcStore'
 import { useTradeStore } from './useTradeStore'
+import { useFamilyStore } from './useFamilyStore'
 
 const SAVE_KEY_PREFIX = 'taoyuanxiang_save_'
 const MAX_SLOTS = 3
@@ -149,6 +150,7 @@ export const useSaveStore = defineStore('save', () => {
       const tutorialStore = useTutorialStore()
       const hiddenNpcStore = useHiddenNpcStore()
       const tradeStore = useTradeStore()
+      const familyStore = useFamilyStore()
 
       const data = {
         game: gameStore.serialize(),
@@ -178,6 +180,7 @@ export const useSaveStore = defineStore('save', () => {
         tutorial: tutorialStore.serialize(),
         hiddenNpc: hiddenNpcStore.serialize(),
         trade: tradeStore.serialize(),
+        family: familyStore.serialize(),
         savedAt: new Date().toISOString()
       }
       localStorage.setItem(`${SAVE_KEY_PREFIX}${slot}`, encrypt(JSON.stringify(data)))
@@ -229,6 +232,7 @@ export const useSaveStore = defineStore('save', () => {
       const tutorialStore = useTutorialStore()
       const hiddenNpcStore = useHiddenNpcStore()
       const tradeStore = useTradeStore()
+      const familyStore = useFamilyStore()
 
       gameStore.deserialize(data.game)
       playerStore.deserialize(data.player)
@@ -258,6 +262,7 @@ export const useSaveStore = defineStore('save', () => {
       if (data.hiddenNpc) hiddenNpcStore.deserialize(data.hiddenNpc)
       // 旧存档没有商会数据：传 undefined 让商会回到初始状态，避免沿用上一个存档的积分
       tradeStore.deserialize(data.trade)
+      if (data.family) familyStore.deserialize(data.family)
       activeSlot.value = slot
       return true
     } catch {
