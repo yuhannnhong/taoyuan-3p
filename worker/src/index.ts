@@ -74,12 +74,15 @@ export default {
       }
     }
 
-    // --- Step 6 接口預留：動作 API ---
-    // POST /act/water    { plots: [...] }
-    // POST /act/harvest  { plots: [...] }
-    // POST /act/plant    { plot, seedId }
-    // POST /act/feed-animals
-    // POST /act/gift     { npcId, itemId }
+    // --- Step 6: 動作 API ---
+    if (request.method === 'POST' && path.startsWith('/act/')) {
+      const action = path.slice('/act/'.length)
+      const params = await request.json()
+      return forwardToDO(env, new Request(doUrl('/act'), {
+        method: 'POST',
+        body: JSON.stringify({ actor, action, params }),
+      }))
+    }
 
     return json({ ok: false, message: `未知路徑: ${path}` }, 404)
   },

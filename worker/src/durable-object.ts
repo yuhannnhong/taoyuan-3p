@@ -1,4 +1,5 @@
-import type { ActorId, WorldSave, ApiResponse } from './types'
+import { ACTION_HANDLERS } from './act-api'
+import type { ActorId, WorldSave } from './types'
 
 export class WorldDO {
   private state: DurableObjectState
@@ -16,6 +17,9 @@ export class WorldDO {
     }
     if (request.method === 'PUT' && path === '/save') {
       return this.handleSave(request)
+    }
+    if (request.method === 'POST' && path === '/act') {
+      return this.handleAct(request)
     }
     if (request.method === 'DELETE' && path === '/reset') {
       return this.handleReset()
@@ -71,6 +75,46 @@ export class WorldDO {
       ok: true,
       message: '存檔成功',
       version: newSave.version,
+    })
+  }
+
+  private async handleAct(request: Request): Promise<Response> {
+    const body = await request.json() as {
+      actor: ActorId
+      action: string
+      params: any
+    }
+
+    const handler = ACTION_HANDLERS[body.action]
+    if (!handler) {
+      return json({ ok: false, message: `未知動作: ${body.action}` }, 400)
+    }
+
+    const current = await this.state.storage.get<WorldSave>('world')
+    if (!current) {
+      return json({ ok: false, message: '尚無存檔，無法執行動作' }, 404)
+    }
+
+    const data = structuredClone(current.data)
+    const result = handler(data, body.actor, body.params)
+
+    if (!result.ok) {
+      return json({ ok: false, message: result.message }, 400)
+    }
+
+    const newSave: WorldSave = {
+      version: current.version + 1,
+      data,
+      lastActor: body.actor,
+      updatedAt: new Date().toISOString(),
+    }
+    await this.state.storage.put('world', newSave)
+
+    return json({
+      ok: true,
+      message: result.message,
+      version: newSave.version,
+      result: result.changes,
     })
   }
 
