@@ -17,7 +17,7 @@
       </div>
       <span class="text-accent shrink-0">
         <Coins :size="12" class="inline" />
-        {{ playerStore.money }}文
+        {{ cheatsStore.infiniteGold ? '∞' : playerStore.money }}文
       </span>
     </div>
 
@@ -74,12 +74,14 @@
   import { ref, computed } from 'vue'
   import { useGameStore, SEASON_NAMES, WEATHER_NAMES } from '@/stores/useGameStore'
   import { usePlayerStore } from '@/stores/usePlayerStore'
+  import { useCheatsStore } from '@/stores/useCheatsStore'
   import { DAY_START_HOUR, DAY_END_HOUR } from '@/data/timeConstants'
   import { Zap, Heart, Clock, Coins, Calendar } from 'lucide-vue-next'
   import CalendarModal from '@/components/game/CalendarModal.vue'
 
   const gameStore = useGameStore()
   const playerStore = usePlayerStore()
+  const cheatsStore = useCheatsStore()
 
   /** 时历弹窗 */
   const showCalendar = ref(false)

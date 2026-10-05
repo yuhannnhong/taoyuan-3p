@@ -25,6 +25,7 @@ import { useTutorialStore } from './useTutorialStore'
 import { useHiddenNpcStore } from './useHiddenNpcStore'
 import { useTradeStore } from './useTradeStore'
 import { useFamilyStore } from './useFamilyStore'
+import { useCheatsStore } from './useCheatsStore'
 
 export interface StoreInstances {
   game: ReturnType<typeof useGameStore>
@@ -54,6 +55,7 @@ export interface StoreInstances {
   hiddenNpc: ReturnType<typeof useHiddenNpcStore>
   trade: ReturnType<typeof useTradeStore>
   family: ReturnType<typeof useFamilyStore>
+  cheats: ReturnType<typeof useCheatsStore>
 }
 
 export function getAllStores(): StoreInstances {
@@ -85,6 +87,7 @@ export function getAllStores(): StoreInstances {
     hiddenNpc: useHiddenNpcStore(),
     trade: useTradeStore(),
     family: useFamilyStore(),
+    cheats: useCheatsStore(),
   }
 }
 
@@ -117,6 +120,7 @@ export function serializeAll(stores: StoreInstances): Record<string, any> {
     hiddenNpc: stores.hiddenNpc.serialize(),
     trade: stores.trade.serialize(),
     family: stores.family.serialize(),
+    cheats: stores.cheats.serialize(),
   }
 }
 
@@ -148,4 +152,5 @@ export function deserializeAll(stores: StoreInstances, data: Record<string, any>
   if (data.hiddenNpc) stores.hiddenNpc.deserialize(data.hiddenNpc)
   stores.trade.deserialize(data.trade)
   if (data.family) stores.family.deserialize(data.family)
+  if (data.cheats) stores.cheats.deserialize(data.cheats)
 }

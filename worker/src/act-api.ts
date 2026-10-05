@@ -239,6 +239,72 @@ export const actKiss: ActionHandler = (data, actor, body) => {
   }
 }
 
+export const actBuySeeds: ActionHandler = (data, actor, body) => {
+  const { seedId, qty, unitPrice } = body
+  if (!seedId || !qty || qty < 1) return { ok: false, message: '缺少 seedId 或 qty' }
+  if (!unitPrice || unitPrice < 0) return { ok: false, message: '缺少 unitPrice' }
+
+  const totalCost = unitPrice * qty
+  const player = data.player ?? {}
+  const cheats = data.cheats ?? {}
+
+  if (!cheats.infiniteGold) {
+    if ((player.money ?? 0) < totalCost) {
+      return { ok: false, message: `金幣不足：需要 ${totalCost}，只有 ${player.money ?? 0}` }
+    }
+    player.money = (player.money ?? 0) - totalCost
+    data.player = player
+  }
+
+  const inv = data.inventory ?? {}
+  const items: any[] = inv.items ?? []
+  const existing = items.find((it: any) => it.id === seedId)
+  if (existing) {
+    existing.count = (existing.count ?? 1) + qty
+  } else {
+    items.push({ id: seedId, count: qty, quality: 'normal' })
+  }
+  inv.items = items
+  data.inventory = inv
+
+  logAction(data, actor, `買了 ${qty} 個 ${seedId}`)
+  return {
+    ok: true,
+    message: `${actorName(actor)}買了 ${qty} 個種子，花了 ${cheats.infiniteGold ? '0（∞）' : totalCost} 文`,
+    changes: { seedId, qty, totalCost: cheats.infiniteGold ? 0 : totalCost },
+  }
+}
+
+export const actNote: ActionHandler = (data, actor, body) => {
+  const { text } = body
+  if (!text || typeof text !== 'string' || text.trim().length === 0) {
+    return { ok: false, message: '紙條內容不能是空的' }
+  }
+  if (text.length > 200) {
+    return { ok: false, message: '紙條太長了（上限 200 字）' }
+  }
+
+  const family = data.family ?? { spouses: ['cenxu', 'shenyuan'], actionLog: [], kissLog: [] }
+  family.notes = family.notes ?? []
+  const game = data.game ?? {}
+
+  family.notes.push({
+    from: actor,
+    text: text.trim(),
+    day: game.day ?? 0,
+    hour: game.hour ?? 0,
+    read: false,
+  })
+  data.family = family
+
+  logAction(data, actor, '留了一張紙條')
+  return {
+    ok: true,
+    message: `${actorName(actor)}留了一張紙條`,
+    changes: { from: actor, text: text.trim() },
+  }
+}
+
 export const ACTION_HANDLERS: Record<string, ActionHandler> = {
   water: actWater,
   harvest: actHarvest,
@@ -246,4 +312,6 @@ export const ACTION_HANDLERS: Record<string, ActionHandler> = {
   'feed-animals': actFeedAnimals,
   gift: actGift,
   kiss: actKiss,
+  'buy-seeds': actBuySeeds,
+  note: actNote,
 }

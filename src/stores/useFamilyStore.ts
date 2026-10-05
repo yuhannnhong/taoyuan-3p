@@ -16,6 +16,14 @@ export interface KissRecord {
   day: number
 }
 
+export interface FamilyNote {
+  from: MemberId
+  text: string
+  day: number
+  hour: number
+  read: boolean
+}
+
 export const MEMBER_NAMES: Record<MemberId, string> = {
   han: '涵寶',
   cenxu: '岑序',
@@ -31,8 +39,10 @@ export const useFamilyStore = defineStore('family', () => {
   const spouses = ref<MemberId[]>(['cenxu', 'shenyuan'])
   const actionLog = ref<ActionLogEntry[]>([])
   const kissLog = ref<KissRecord[]>([])
+  const notes = ref<FamilyNote[]>([])
 
   const hasSpouses = computed(() => spouses.value.length > 0)
+  const unreadNotes = computed(() => notes.value.filter(n => !n.read))
 
   const getSpouseName = (idx: number): string => {
     const id = spouses.value[idx]
@@ -72,23 +82,37 @@ export const useFamilyStore = defineStore('family', () => {
     return kissLog.value.filter(k => k.day === day)
   }
 
+  function markNoteRead(index: number): void {
+    if (notes.value[index]) {
+      notes.value[index].read = true
+    }
+  }
+
+  function markAllNotesRead(): void {
+    for (const n of notes.value) n.read = true
+  }
+
   const serialize = () => ({
     spouses: spouses.value,
     actionLog: actionLog.value,
     kissLog: kissLog.value,
+    notes: notes.value,
   })
 
   const deserialize = (data: any) => {
     if (data.spouses) spouses.value = data.spouses
     actionLog.value = data.actionLog ?? []
     kissLog.value = data.kissLog ?? []
+    notes.value = data.notes ?? []
   }
 
   return {
     spouses,
     actionLog,
     kissLog,
+    notes,
     hasSpouses,
+    unreadNotes,
     getSpouseName,
     addAction,
     getTodayActions,
@@ -97,6 +121,8 @@ export const useFamilyStore = defineStore('family', () => {
     hasKissedToday,
     recordKiss,
     getTodayKisses,
+    markNoteRead,
+    markAllNotesRead,
     serialize,
     deserialize,
   }

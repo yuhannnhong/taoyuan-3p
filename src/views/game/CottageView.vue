@@ -34,6 +34,18 @@
         家人
       </p>
 
+      <!-- 紙條 -->
+      <div v-if="familyStore.unreadNotes.length > 0" class="border border-accent/30 bg-accent/5 rounded-xs p-2 mb-2">
+        <div class="flex items-center justify-between mb-1">
+          <span class="text-[10px] text-accent">📝 有 {{ familyStore.unreadNotes.length }} 張紙條</span>
+          <Button class="py-0 px-1 text-[10px]" @click="familyStore.markAllNotesRead()">全部已讀</Button>
+        </div>
+        <div v-for="(note, i) in familyStore.unreadNotes" :key="i" class="text-xs mb-1 last:mb-0">
+          <span class="text-accent">{{ MEMBER_NAMES[note.from] }}</span>
+          <span class="text-muted">：{{ note.text }}</span>
+        </div>
+      </div>
+
       <!-- 家庭成員 -->
       <div v-for="sid in familyStore.spouses" :key="sid" class="border border-accent/10 rounded-xs p-2 mb-2">
         <div class="flex items-center justify-between">

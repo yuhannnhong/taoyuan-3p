@@ -1,6 +1,7 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import type { Gender } from '@/types'
+import { useCheatsStore } from './useCheatsStore'
 import {
   LATE_NIGHT_RECOVERY_MAX,
   LATE_NIGHT_RECOVERY_MIN,
@@ -225,6 +226,7 @@ export const usePlayerStore = defineStore('player', () => {
 
   /** 花费铜钱，返回是否成功 */
   const spendMoney = (amount: number): boolean => {
+    if (useCheatsStore().infiniteGold) return true
     if (money.value < amount) return false
     money.value -= amount
     return true
