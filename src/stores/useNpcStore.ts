@@ -807,20 +807,6 @@ export const useNpcStore = defineStore('npc', () => {
     }
   }
 
-  /** 放生子女 */
-  const releaseChild = (childId: number): { success: boolean; message: string } => {
-    const child = children.value.find(c => c.id === childId)
-    if (!child) return { success: false, message: '找不到这个孩子。' }
-
-    const playerStore = usePlayerStore()
-    if (!playerStore.spendMoney(10000)) {
-      return { success: false, message: '金钱不足（需要10000文）。' }
-    }
-
-    const name = child.name
-    children.value = children.value.filter(c => c.id !== childId)
-    return { success: true, message: `${name}被送往了远方亲戚家。` }
-  }
 
   // ============================================================
   // 孕期养成系统
@@ -1408,7 +1394,6 @@ export const useNpcStore = defineStore('npc', () => {
     dailyWeddingUpdate,
     cancelWedding,
     divorce,
-    releaseChild,
     getHireableNpcs,
     hireHelper,
     dismissHelper,

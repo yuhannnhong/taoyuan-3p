@@ -38,10 +38,21 @@
       <div v-for="sid in familyStore.spouses" :key="sid" class="border border-accent/10 rounded-xs p-2 mb-2">
         <div class="flex items-center justify-between">
           <span class="text-xs text-accent">{{ MEMBER_NAMES[sid] }}</span>
-          <span class="text-[10px] text-danger">
-            <Heart :size="10" class="inline" />
-            伴侣
-          </span>
+          <div class="flex items-center space-x-1.5">
+            <Button
+              v-if="!familyStore.hasKissedToday('han', sid, gameStore.day)"
+              class="py-0 px-1"
+              :icon="Heart"
+              @click="handleKiss(sid)"
+            >
+              親親
+            </Button>
+            <span v-else class="text-[10px] text-muted">已親</span>
+            <span class="text-[10px] text-danger">
+              <Heart :size="10" class="inline" />
+              伴侣
+            </span>
+          </div>
         </div>
       </div>
 
@@ -73,7 +84,6 @@
               </Button>
               <span v-else-if="child.stage !== 'baby'" class="text-xs text-muted">已互动</span>
               <span v-else class="text-xs text-muted">还太小</span>
-              <Button class="py-0 px-1 text-danger" @click="releaseConfirmChildId = child.id">送走</Button>
             </div>
           </div>
           <p class="text-[10px] text-muted mb-0.5">{{ CHILD_STAGE_NAMES[child.stage] }} · {{ child.daysOld }}天</p>
@@ -87,14 +97,6 @@
               :fill="child.friendship >= h * 30 ? 'currentColor' : 'none'"
             />
           </div>
-        </div>
-      </div>
-      <!-- 送走子女确认 -->
-      <div v-if="releaseConfirmChildId !== null" class="mt-2 game-panel border-danger/40">
-        <p class="text-xs text-danger mb-2">确定将{{ getChildName(releaseConfirmChildId) }}送往远方亲戚家吗？（花费10000文）</p>
-        <div class="grid grid-cols-2 gap-2">
-          <Button class="text-danger" @click="handleReleaseChild">确认</Button>
-          <Button @click="releaseConfirmChildId = null">取消</Button>
         </div>
       </div>
     </div>
@@ -453,6 +455,7 @@
   import { useInventoryStore } from '@/stores/useInventoryStore'
   import { useNpcStore } from '@/stores/useNpcStore'
   import { useFamilyStore, MEMBER_NAMES } from '@/stores/useFamilyStore'
+  import type { MemberId } from '@/stores/useFamilyStore'
   import { useAchievementStore } from '@/stores/useAchievementStore'
   import { usePlayerStore } from '@/stores/usePlayerStore'
   import { getCombinedItemCount } from '@/composables/useCombinedInventory'
@@ -473,7 +476,6 @@
 
   const todayActions = computed(() => familyStore.getTodayActions(gameStore.day))
 
-  const releaseConfirmChildId = ref<number | null>(null)
   const showUpgradeModal = ref(false)
   const showAgingModal = ref(false)
   const showCalendarModal = ref(false)
@@ -555,9 +557,6 @@
     return getItemById(itemId)?.name ?? itemId
   }
 
-  const getChildName = (childId: number): string => {
-    return npcStore.children.find(c => c.id === childId)?.name ?? '孩子'
-  }
 
   // === 操作处理 ===
 
@@ -572,6 +571,22 @@
     }
   }
 
+  const handleKiss = (target: MemberId) => {
+    const check = familyStore.canKiss('han', target)
+    if (!check.ok) {
+      addLog('無法進行這個互動。')
+      return
+    }
+    if (familyStore.hasKissedToday('han', target, gameStore.day)) {
+      addLog('今天已經親過了。')
+      return
+    }
+    familyStore.recordKiss('han', target, gameStore.day)
+    playerStore.stamina = Math.min(playerStore.stamina + 10, playerStore.maxStamina)
+    familyStore.addAction('han', `親了${MEMBER_NAMES[target]}`, gameStore.day, gameStore.hour)
+    addLog(`你親了${MEMBER_NAMES[target]}，體力恢復了一點。`)
+  }
+
   const handleInteractChild = (childId: number) => {
     const result = npcStore.interactWithChild(childId)
     if (result) {
@@ -584,12 +599,6 @@
     }
   }
 
-  const handleReleaseChild = () => {
-    if (releaseConfirmChildId.value === null) return
-    const result = npcStore.releaseChild(releaseConfirmChildId.value)
-    addLog(result.message)
-    releaseConfirmChildId.value = null
-  }
 
   const handleStartAgingFromModal = (itemId: string, quality: Quality) => {
     if (homeStore.startAging(itemId, quality)) {

@@ -196,10 +196,54 @@ function logAction(data: Record<string, any>, actor: ActorId, action: string): v
   data.family = family
 }
 
+const ALLOWED_KISS_PAIRS = new Set([
+  'han:cenxu', 'cenxu:han',
+  'han:shenyuan', 'shenyuan:han',
+])
+
+export const actKiss: ActionHandler = (data, actor, body) => {
+  const target = body.target as ActorId | undefined
+  if (!target) return { ok: false, message: '缺少 target' }
+
+  const pair = `${actor}:${target}`
+  if (!ALLOWED_KISS_PAIRS.has(pair)) {
+    return { ok: false, message: 'interaction_not_allowed' }
+  }
+
+  const family = data.family ?? { spouses: ['cenxu', 'shenyuan'], actionLog: [], kissLog: [] }
+  family.kissLog = family.kissLog ?? []
+  const game = data.game ?? {}
+  const day = game.day ?? 0
+
+  const already = family.kissLog.some(
+    (k: any) => k.from === actor && k.to === target && k.day === day,
+  )
+  if (already) {
+    return { ok: false, message: '今天已經親過了' }
+  }
+
+  family.kissLog.push({ from: actor, to: target, day })
+  data.family = family
+
+  const player = data.player ?? {}
+  if (target === 'han') {
+    player.stamina = Math.min((player.stamina ?? 100) + 10, player.maxStamina ?? 120)
+    data.player = player
+  }
+
+  logAction(data, actor, `親了${actorName(target)}`)
+  return {
+    ok: true,
+    message: `${actorName(actor)}親了${actorName(target)}`,
+    changes: { from: actor, to: target, staminaBoost: 10 },
+  }
+}
+
 export const ACTION_HANDLERS: Record<string, ActionHandler> = {
   water: actWater,
   harvest: actHarvest,
   plant: actPlant,
   'feed-animals': actFeedAnimals,
   gift: actGift,
+  kiss: actKiss,
 }
