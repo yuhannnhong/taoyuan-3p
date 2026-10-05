@@ -24,6 +24,7 @@ export const NPCS: NpcDef[] = [
   },
   {
     id: 'liu_niang',
+    hidden: true,
     name: '柳娘',
     gender: 'female',
     role: '村长的女儿',
@@ -38,7 +39,7 @@ export const NPCS: NpcDef[] = [
       friendly: ['有{title}在，村子热闹了不少呢。', '我做了些桂花糕，{player}尝一块吧。'],
       bestFriend: ['和{title}聊天总是很开心……', '这朵花送给你，是我在山上找到的。']
     },
-    marriageable: true,
+    marriageable: false,
     heartEventIds: ['liu_niang_heart_3', 'liu_niang_heart_5', 'liu_niang_heart_8'],
     datingDialogues: [
       '今天想和{player}一起去溪边散步呢。',
@@ -54,6 +55,7 @@ export const NPCS: NpcDef[] = [
   },
   {
     id: 'a_shi',
+    hidden: true,
     name: '阿石',
     gender: 'male',
     role: '矿工',
@@ -68,7 +70,7 @@ export const NPCS: NpcDef[] = [
       friendly: ['这块矿石不错，给{title}。', '{player}的镐该升级了，我可以帮你看看。'],
       bestFriend: ['……{player}是我第一个朋友。', '最深处的宝藏……我只告诉{title}。']
     },
-    marriageable: true,
+    marriageable: false,
     heartEventIds: ['a_shi_heart_3', 'a_shi_heart_5', 'a_shi_heart_8'],
     datingDialogues: [
       '……{player}，这块矿石很漂亮。像你的眼睛。',
@@ -80,6 +82,7 @@ export const NPCS: NpcDef[] = [
   },
   {
     id: 'qiu_yue',
+    hidden: true,
     name: '秋月',
     gender: 'female',
     role: '渔家女',
@@ -94,7 +97,7 @@ export const NPCS: NpcDef[] = [
       friendly: ['这是我的私房钓点，只告诉{title}哦。', '我教{player}做红烧鲤鱼吧，超好吃的！'],
       bestFriend: ['以后一起去钓鱼好不好？每天都去！', '{title}是我见过最厉害的钓手！嘿嘿。']
     },
-    marriageable: true,
+    marriageable: false,
     heartEventIds: ['qiu_yue_heart_3', 'qiu_yue_heart_5', 'qiu_yue_heart_8'],
     datingDialogues: [
       '{player}！今天的夕阳好美，我们一起看嘛！',
@@ -137,6 +140,7 @@ export const NPCS: NpcDef[] = [
   },
   {
     id: 'xiao_man',
+    hidden: true,
     name: '小满',
     gender: 'male',
     role: '木匠学徒',
@@ -158,6 +162,7 @@ export const NPCS: NpcDef[] = [
   // ============================================================
   {
     id: 'chun_lan',
+    hidden: true,
     name: '春兰',
     gender: 'female',
     role: '茶庄女主人',
@@ -172,7 +177,7 @@ export const NPCS: NpcDef[] = [
       friendly: ['{player}的口味我记住了，特意留了你喜欢的茶。', '我家有几亩茶园，改天带{title}去看看。'],
       bestFriend: ['和{title}品茶的时光，是我一天中最期待的事。', '这盏茶，只为{player}而泡。']
     },
-    marriageable: true,
+    marriageable: false,
     heartEventIds: ['chun_lan_heart_3', 'chun_lan_heart_5', 'chun_lan_heart_8'],
     datingDialogues: [
       '这盏茶，是我为{player}特别调配的，尝尝看。',
@@ -188,6 +193,7 @@ export const NPCS: NpcDef[] = [
   },
   {
     id: 'xue_qin',
+    hidden: true,
     name: '雪芹',
     gender: 'female',
     role: '画师',
@@ -202,7 +208,7 @@ export const NPCS: NpcDef[] = [
       friendly: ['{player}，你的田庄在夕阳下很美，我画了一幅。', '本来不喜欢人多的地方……但{title}来了还好。'],
       bestFriend: ['以前觉得世间无人懂我的画……直到遇见{player}。', '这幅画是为{title}画的，收好。']
     },
-    marriageable: true,
+    marriageable: false,
     heartEventIds: ['xue_qin_heart_3', 'xue_qin_heart_5', 'xue_qin_heart_8'],
     datingDialogues: [
       '……{player}，你别动，让我画下你现在的样子。',
@@ -218,6 +224,7 @@ export const NPCS: NpcDef[] = [
   },
   {
     id: 'su_su',
+    hidden: true,
     name: '素素',
     gender: 'female',
     role: '裁缝',
@@ -232,7 +239,7 @@ export const NPCS: NpcDef[] = [
       friendly: ['我给{player}做了件背心，试试合不合身？', '一针一线，都是心意……'],
       bestFriend: ['{player}穿我做的衣服，是我最开心的事。', '以后我只给{title}一个人做衣裳。']
     },
-    marriageable: true,
+    marriageable: false,
     heartEventIds: ['su_su_heart_3', 'su_su_heart_5', 'su_su_heart_8'],
     datingDialogues: [
       '我在给{player}做一件衣裳，每一针都是心意。',
@@ -248,6 +255,7 @@ export const NPCS: NpcDef[] = [
   },
   {
     id: 'hong_dou',
+    hidden: true,
     name: '红豆',
     gender: 'female',
     role: '酒庄女',
@@ -262,7 +270,7 @@ export const NPCS: NpcDef[] = [
       friendly: ['{player}算我的好朋友，这坛子酒送你了！', '下回咱们划拳喝酒，谁输谁请客！'],
       bestFriend: ['全村就{title}你配得上喝我的珍藏。', '{player}在，酒才香。']
     },
-    marriageable: true,
+    marriageable: false,
     heartEventIds: ['hong_dou_heart_3', 'hong_dou_heart_5', 'hong_dou_heart_8'],
     datingDialogues: [
       '{player}！来，陪我喝一杯！今天的酒特别甜。',
@@ -278,6 +286,7 @@ export const NPCS: NpcDef[] = [
   },
   {
     id: 'dan_qing',
+    hidden: true,
     name: '丹青',
     gender: 'male',
     role: '书生',
@@ -292,7 +301,7 @@ export const NPCS: NpcDef[] = [
       friendly: ['{player}，改日我为你写一幅字吧。', '有{title}这样的知己，此生无憾。'],
       bestFriend: ['若非遇见{player}，我早已离开此地了。', '笔墨纸砚，不如{title}一笑。']
     },
-    marriageable: true,
+    marriageable: false,
     heartEventIds: ['dan_qing_heart_3', 'dan_qing_heart_5', 'dan_qing_heart_8'],
     datingDialogues: [
       '今日写了一首词，是关于{player}的……要听吗？',
@@ -308,6 +317,7 @@ export const NPCS: NpcDef[] = [
   },
   {
     id: 'a_tie',
+    hidden: true,
     name: '阿铁',
     gender: 'male',
     role: '铁匠学徒',
@@ -322,7 +332,7 @@ export const NPCS: NpcDef[] = [
       friendly: ['我偷偷给{player}的工具加了料，更耐用了。', '{title}是唯一不笑话我笨手笨脚的人……'],
       bestFriend: ['{player}……谢谢你一直鼓励我。', '等我出师了，第一件作品送给{title}。']
     },
-    marriageable: true,
+    marriageable: false,
     heartEventIds: ['a_tie_heart_3', 'a_tie_heart_5', 'a_tie_heart_8'],
     datingDialogues: [
       '我、我给{player}打了个铁花……不好看的话就扔掉吧……',
@@ -338,6 +348,7 @@ export const NPCS: NpcDef[] = [
   },
   {
     id: 'yun_fei',
+    hidden: true,
     name: '云飞',
     gender: 'male',
     role: '猎人',
@@ -352,7 +363,7 @@ export const NPCS: NpcDef[] = [
       friendly: ['{player}，你是少数不让我烦的人。', '以后进山叫上{title}，路我熟。'],
       bestFriend: ['我这辈子不信任何人……除了{player}。', '{title}，跟我一起守这片山林吧。']
     },
-    marriageable: true,
+    marriageable: false,
     heartEventIds: ['yun_fei_heart_3', 'yun_fei_heart_5', 'yun_fei_heart_8'],
     datingDialogues: [
       '……{player}，今天的月色不错。陪我坐一会儿。',
@@ -364,6 +375,7 @@ export const NPCS: NpcDef[] = [
   },
   {
     id: 'da_niu',
+    hidden: true,
     name: '大牛',
     gender: 'male',
     role: '牧场小伙',
@@ -378,7 +390,7 @@ export const NPCS: NpcDef[] = [
       friendly: ['{player}的鸡养得真不错，有我当年的风范！', '有空来我家，我给{title}看看新生的小牛犊！'],
       bestFriend: ['{player}是我见过最会照顾动物的人！', '{title}，将来咱们合开一个大牧场怎么样？']
     },
-    marriageable: true,
+    marriageable: false,
     heartEventIds: ['da_niu_heart_3', 'da_niu_heart_5', 'da_niu_heart_8'],
     datingDialogues: [
       '{player}！今天小牛犊出生了！我第一个想告诉你！',
@@ -394,6 +406,7 @@ export const NPCS: NpcDef[] = [
   },
   {
     id: 'mo_bai',
+    hidden: true,
     name: '墨白',
     gender: 'male',
     role: '乐师',
@@ -408,7 +421,7 @@ export const NPCS: NpcDef[] = [
       friendly: ['{player}来了，正好，新写了一首曲子，你听听。', '有{title}听我弹琴……心情好了很多。'],
       bestFriend: ['这首曲子没有名字……因为它是为{player}而作的。', '{title}是我的知音。']
     },
-    marriageable: true,
+    marriageable: false,
     heartEventIds: ['mo_bai_heart_3', 'mo_bai_heart_5', 'mo_bai_heart_8'],
     datingDialogues: [
       '……{player}，这首曲子只弹给你听。',
@@ -479,6 +492,7 @@ export const NPCS: NpcDef[] = [
   },
   {
     id: 'zhang_popo',
+    hidden: true,
     name: '张婆婆',
     gender: 'female',
     role: '织布老人',
@@ -513,6 +527,7 @@ export const NPCS: NpcDef[] = [
   },
   {
     id: 'zhou_xiucai',
+    hidden: true,
     name: '周秀才',
     gender: 'male',
     role: '私塾先生',
@@ -530,6 +545,7 @@ export const NPCS: NpcDef[] = [
   },
   {
     id: 'wu_shen',
+    hidden: true,
     name: '吴婶',
     gender: 'female',
     role: '杂货帮工',
@@ -564,6 +580,7 @@ export const NPCS: NpcDef[] = [
   },
   {
     id: 'lao_song',
+    hidden: true,
     name: '老宋',
     gender: 'male',
     role: '守夜人',
@@ -581,6 +598,7 @@ export const NPCS: NpcDef[] = [
   },
   {
     id: 'pang_shen',
+    hidden: true,
     name: '胖婶',
     gender: 'female',
     role: '豆腐坊老板',
@@ -598,6 +616,7 @@ export const NPCS: NpcDef[] = [
   },
   {
     id: 'a_hua',
+    hidden: true,
     name: '阿花',
     gender: 'female',
     role: '陈伯的孙女',
@@ -615,6 +634,7 @@ export const NPCS: NpcDef[] = [
   },
   {
     id: 'shi_tou',
+    hidden: true,
     name: '石头',
     gender: 'male',
     role: '村里顽童',
@@ -632,6 +652,7 @@ export const NPCS: NpcDef[] = [
   },
   {
     id: 'hui_niang',
+    hidden: true,
     name: '慧娘',
     gender: 'female',
     role: '绣庄老板',
@@ -649,6 +670,7 @@ export const NPCS: NpcDef[] = [
   },
   {
     id: 'lao_lu',
+    hidden: true,
     name: '老陆',
     gender: 'male',
     role: '酒窖老板',
@@ -683,6 +705,7 @@ export const NPCS: NpcDef[] = [
   },
   {
     id: 'qian_niang',
+    hidden: true,
     name: '钱娘',
     gender: 'female',
     role: '药铺学徒',
@@ -700,6 +723,7 @@ export const NPCS: NpcDef[] = [
   },
   {
     id: 'he_zhanggui',
+    hidden: true,
     name: '何掌柜',
     gender: 'male',
     role: '茶楼掌柜',
@@ -734,6 +758,7 @@ export const NPCS: NpcDef[] = [
   },
   {
     id: 'a_fu',
+    hidden: true,
     name: '阿福',
     gender: 'male',
     role: '放牛娃',

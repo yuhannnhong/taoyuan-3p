@@ -6,40 +6,7 @@
       <span>任务</span>
     </div>
 
-    <!-- 主线任务 -->
-    <div class="border border-accent/20 rounded-xs p-3 mb-3">
-      <p class="text-xs text-muted mb-2">
-        <BookOpen :size="12" class="inline" />
-        主线任务
-      </p>
-      <div
-        v-if="mainQuestDef"
-        class="flex items-center justify-between border rounded-xs px-3 py-1.5 cursor-pointer"
-        :class="
-          questStore.mainQuest?.accepted && questStore.canSubmitMainQuest()
-            ? 'border-success/50 bg-success/5 hover:bg-success/10'
-            : 'border-accent/20 hover:bg-accent/5'
-        "
-        @click="questModal = { type: 'main' }"
-      >
-        <div class="min-w-0">
-          <p class="text-xs text-accent truncate">第{{ mainQuestDef.chapter }}章 · {{ mainQuestDef.title }}</p>
-          <p class="text-xs text-muted truncate">
-            {{ mainQuestDef.description }}
-          </p>
-        </div>
-        <span
-          class="text-xs whitespace-nowrap ml-2"
-          :class="questStore.canSubmitMainQuest() ? 'text-success' : questStore.mainQuest?.accepted ? 'text-accent' : 'text-muted'"
-        >
-          {{ questStore.canSubmitMainQuest() ? '可提交' : questStore.mainQuest?.accepted ? '进行中' : '未接取' }}
-        </span>
-      </div>
-      <div v-else-if="questStore.completedMainQuests.length >= 50" class="flex flex-col items-center justify-center py-4 text-muted">
-        <CheckCircle :size="24" />
-        <p class="text-xs mt-1">主线任务已全部完成</p>
-      </div>
-    </div>
+    <!-- 主线任务（已隱藏：三人模式不使用單人劇情線） -->
 
     <!-- 今日委托 -->
     <div class="border border-accent/20 rounded-xs p-3 mb-3">
@@ -330,7 +297,7 @@
 
 <script setup lang="ts">
   import { ref, computed } from 'vue'
-  import { ClipboardList, Calendar, Clock, Plus, CheckCircle, CircleCheck, Circle, Star, BookOpen, X } from 'lucide-vue-next'
+  import { ClipboardList, Calendar, Clock, Plus, CheckCircle, CircleCheck, Circle, Star, X } from 'lucide-vue-next'
   import Button from '@/components/game/Button.vue'
   import type { QuestInstance } from '@/types'
   import { useInventoryStore } from '@/stores/useInventoryStore'

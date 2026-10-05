@@ -23,14 +23,10 @@ import {
   Wrench,
   Package,
   Star,
-  BookOpen,
   Wallet,
   ScrollText,
   User,
   FlaskConical,
-  Landmark,
-  Swords,
-  Tent,
   Waves,
   Handshake
 } from 'lucide-vue-next'
@@ -91,12 +87,10 @@ export const TABS: {
   { key: 'charinfo', label: '角色', icon: User },
   { key: 'inventory', label: '背包', icon: Package },
   { key: 'skills', label: '技能', icon: Star },
-  { key: 'achievement', label: '图鉴', icon: BookOpen },
+  // achievement 已隱藏
   { key: 'wallet', label: '钱袋', icon: Wallet },
   { key: 'quest', label: '告示栏', icon: ScrollText },
-  { key: 'museum', label: '博物馆', icon: Landmark },
-  { key: 'guild', label: '公会', icon: Swords },
-  { key: 'hanhai', label: '瀚海', icon: Tent }
+  // museum, guild, hanhai 已隱藏
 ]
 
 /** 导航到游戏面板，检查旅行时间、就寝时间和商店营业时间 */

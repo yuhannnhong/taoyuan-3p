@@ -1,6 +1,11 @@
 import type { QuestTemplateDef, QuestInstance, QuestType } from '@/types/quest'
 import type { Season } from '@/types/game'
-import { getNpcById } from './npcs'
+import { getNpcById, NPCS } from './npcs'
+
+const isNpcHidden = (npcId: string): boolean => {
+  const def = NPCS.find(n => n.id === npcId)
+  return def?.hidden === true
+}
 
 export const QUEST_TEMPLATES: QuestTemplateDef[] = [
   {
@@ -533,7 +538,7 @@ const TIER_FRIENDSHIP = [5, 8, 12, 15]
 /** 根据当前季节和梯度生成特殊订单 (tier: 1-4 对应 第7/14/21/28天) */
 export const generateSpecialOrder = (season: Season, tier: number): QuestInstance | null => {
   const clampedTier = Math.max(1, Math.min(4, tier))
-  const valid = SPECIAL_ORDER_TEMPLATES.filter(t => t.tier === clampedTier && (t.seasons.length === 0 || t.seasons.includes(season)))
+  const valid = SPECIAL_ORDER_TEMPLATES.filter(t => t.tier === clampedTier && (t.seasons.length === 0 || t.seasons.includes(season)) && !isNpcHidden(t.npcId))
   if (valid.length === 0) return null
 
   const template = valid[Math.floor(Math.random() * valid.length)]!
@@ -576,8 +581,10 @@ export const generateQuest = (season: Season, _day: number): QuestInstance | nul
   // 随机选择目标
   const target = validTargets[Math.floor(Math.random() * validTargets.length)]!
 
-  // 从候选池随机选择 NPC
-  const npcId = template.npcPool[Math.floor(Math.random() * template.npcPool.length)]!
+  // 从候选池随机选择 NPC（排除隱藏 NPC）
+  const visiblePool = template.npcPool.filter(id => !isNpcHidden(id))
+  if (visiblePool.length === 0) return null
+  const npcId = visiblePool[Math.floor(Math.random() * visiblePool.length)]!
   const npcDef = getNpcById(npcId)
   const npcName = npcDef?.name ?? npcId
 

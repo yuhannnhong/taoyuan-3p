@@ -3,27 +3,10 @@
     <!-- Tab 切换按钮 -->
     <h3 class="text-accent text-sm mb-3">桃源村</h3>
 
-    <div class="flex space-x-1.5 mb-3">
-      <Button
-        class="flex-1 justify-center"
-        :class="{ '!bg-accent !text-bg': activeTab === 'villager' }"
-        :icon="Users"
-        @click="activeTab = 'villager'"
-      >
-        村民
-      </Button>
-      <Button
-        class="flex-1 justify-center"
-        :class="{ '!bg-accent !text-bg': activeTab === 'spirit' }"
-        :icon="Sparkles"
-        @click="activeTab = 'spirit'"
-      >
-        仙灵
-      </Button>
-    </div>
+    <!-- 仙靈 tab 已隱藏 -->
 
-    <!-- 村民 Tab -->
-    <div v-if="activeTab === 'villager'">
+    <!-- 村民 -->
+    <div>
       <p v-if="tutorialHint" class="text-[10px] text-muted/50 mb-2">
         {{ tutorialHint }}
       </p>
@@ -48,7 +31,7 @@
       <!-- NPC 网格：移动端紧凑，桌面端详细 -->
       <div class="grid grid-cols-4 md:grid-cols-3 gap-1.5 md:gap-2">
         <div
-          v-for="npc in NPCS"
+          v-for="npc in visibleNpcs"
           :key="npc.id"
           class="border border-accent/20 rounded-xs p-1.5 md:p-2 transition-colors cursor-pointer hover:bg-accent/5"
           :class="[npcAvailable(npc.id) ? '' : 'opacity-50', 'text-center md:text-left']"
@@ -117,82 +100,7 @@
       </div>
     </div>
 
-    <!-- 仙灵 Tab -->
-    <div v-if="activeTab === 'spirit'">
-      <!-- 已显现的仙灵 -->
-      <template v-if="revealedHiddenNpcs.length > 0">
-        <div class="grid grid-cols-4 md:grid-cols-3 gap-1.5 md:gap-2">
-          <div
-            v-for="npc in revealedHiddenNpcs"
-            :key="npc.id"
-            class="border border-accent/20 rounded-xs p-1.5 md:p-2 cursor-pointer hover:bg-accent/5 text-center md:text-left"
-            @click="selectedHiddenNpc = npc.id"
-          >
-            <!-- 移动端：紧凑布局 -->
-            <div class="md:hidden">
-              <p class="text-xs text-accent truncate">{{ npc.name }}</p>
-              <p
-                class="text-[10px] flex items-center justify-center"
-                :class="hiddenHeartCount(npc.id) > 0 ? 'text-accent' : 'text-muted/30'"
-              >
-                {{ hiddenHeartCount(npc.id) }}
-                <Diamond :size="10" :fill="hiddenHeartCount(npc.id) > 0 ? 'currentColor' : 'none'" />
-                <span class="text-muted/50 ml-0.5">{{ hiddenNpcStore.getHiddenNpcState(npc.id)?.affinity ?? 0 }}</span>
-              </p>
-            </div>
-            <!-- 桌面端：显示更多信息 -->
-            <div class="hidden md:block">
-              <div class="flex items-center justify-between">
-                <span class="text-xs text-accent">{{ npc.name }}</span>
-              </div>
-              <p class="text-[10px] text-muted truncate">{{ npc.title }}</p>
-              <div class="flex items-center justify-between mt-0.5">
-                <div class="flex items-center space-x-px">
-                  <Diamond
-                    v-for="d in 12"
-                    :key="d"
-                    :size="8"
-                    class="flex-shrink-0"
-                    :class="(hiddenNpcStore.getHiddenNpcState(npc.id)?.affinity ?? 0) >= d * 250 ? 'text-accent' : 'text-muted/20'"
-                    :fill="(hiddenNpcStore.getHiddenNpcState(npc.id)?.affinity ?? 0) >= d * 250 ? 'currentColor' : 'none'"
-                  />
-                </div>
-                <span class="text-[10px] text-muted/50">{{ hiddenNpcStore.getHiddenNpcState(npc.id)?.affinity ?? 0 }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </template>
-
-      <!-- 传闻区（显示rumor/glimpse阶段的线索） -->
-      <div v-if="rumorHiddenNpcs.length > 0" :class="{ 'mt-4': revealedHiddenNpcs.length > 0 }">
-        <h3 class="text-muted/60 text-sm mb-2">传闻</h3>
-        <div class="flex flex-col space-y-1">
-          <div v-for="npc in rumorHiddenNpcs" :key="npc.id" class="border border-muted/10 rounded-xs px-2 py-1 text-[10px] text-muted/50">
-            <span v-if="hiddenNpcStore.getHiddenNpcState(npc.id)?.discoveryPhase === 'rumor'">
-              {{ getLastDiscoveryLog(npc.id) ?? '似乎有什么隐约的传说……' }}
-            </span>
-            <span v-else>
-              {{ getLastDiscoveryLog(npc.id) ?? '你曾看到某种异象……' }}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <!-- 仙灵空状态 -->
-      <div
-        v-if="revealedHiddenNpcs.length === 0 && rumorHiddenNpcs.length === 0"
-        class="flex flex-col items-center justify-center py-12 text-muted"
-      >
-        <Sparkles :size="32" class="mb-2" />
-        <p class="text-xs">尚未发现任何仙灵的踪迹。</p>
-      </div>
-    </div>
-
-    <!-- 仙灵交互弹窗 -->
-    <Transition name="panel-fade">
-      <HiddenNpcModal v-if="selectedHiddenNpc" :npc-id="selectedHiddenNpc" @close="selectedHiddenNpc = null" />
-    </Transition>
+    <!-- 仙靈系統已隱藏 -->
 
     <!-- NPC 交互弹窗 -->
     <Transition name="panel-fade">
@@ -602,9 +510,6 @@
     Lightbulb,
     Circle,
     CircleCheck,
-    Users,
-    Sparkles,
-    Diamond,
     MapPin,
     Pencil
   } from 'lucide-vue-next'
@@ -614,9 +519,7 @@
   import { useNpcStore, FRIENDSHIP_LEVEL_INFO, FRIENDSHIP_LEVEL_ORDER, NPC_NOTE_MAX_LENGTH } from '@/stores/useNpcStore'
   import { usePlayerStore } from '@/stores/usePlayerStore'
   import { useTutorialStore } from '@/stores/useTutorialStore'
-  import { useHiddenNpcStore } from '@/stores/useHiddenNpcStore'
   import { NPCS, getNpcById, getItemById, getHeartEventById } from '@/data'
-  import { getHiddenNpcById } from '@/data/hiddenNpcs'
   import { ACTION_TIME_COSTS, isNpcAvailable, getNpcUnavailableReason } from '@/data/timeConstants'
   import { getNpcSpot, getNpcSpotName, SPOT_NAMES, type NpcSpot } from '@/data/npcSchedule'
   import { TIP_NPC_LABELS } from '@/data/npcTips'
@@ -626,7 +529,6 @@
   import { handleEndDay } from '@/composables/useEndDay'
   import type { FriendshipLevel, Quality } from '@/types'
   import Button from '@/components/game/Button.vue'
-  import HiddenNpcModal from '@/components/game/HiddenNpcModal.vue'
 
   const npcStore = useNpcStore()
   const inventoryStore = useInventoryStore()
@@ -634,27 +536,8 @@
   const gameStore = useGameStore()
   const playerStore = usePlayerStore()
   const tutorialStore = useTutorialStore()
-  const hiddenNpcStore = useHiddenNpcStore()
 
-  const activeTab = ref<'villager' | 'spirit'>('villager')
-  const selectedHiddenNpc = ref<string | null>(null)
-
-  const revealedHiddenNpcs = computed(() => hiddenNpcStore.getRevealedNpcs)
-  const rumorHiddenNpcs = computed(() => hiddenNpcStore.getRumorNpcs)
-
-  const hiddenHeartCount = (npcId: string): number => {
-    const affinity = hiddenNpcStore.getHiddenNpcState(npcId)?.affinity ?? 0
-    return Math.min(12, Math.floor(affinity / 250))
-  }
-
-  const getLastDiscoveryLog = (npcId: string): string | null => {
-    const npcDef = getHiddenNpcById(npcId)
-    const state = hiddenNpcStore.getHiddenNpcState(npcId)
-    if (!npcDef || !state) return null
-    const lastStepId = state.completedSteps[state.completedSteps.length - 1]
-    const step = npcDef.discoverySteps.find(s => s.id === lastStepId)
-    return step?.logMessage ?? null
-  }
+  const visibleNpcs = computed(() => NPCS.filter(npc => !npc.hidden))
 
   const tutorialHint = computed(() => {
     if (!tutorialStore.enabled || gameStore.year > 1) return null
@@ -710,7 +593,7 @@
   /** 按地点汇总此刻在外活动的村民 */
   const spotGroups = computed(() => {
     const map = new Map<NpcSpot, string[]>()
-    for (const npc of NPCS) {
+    for (const npc of visibleNpcs.value) {
       if (!npcAvailable(npc.id)) continue
       const spot = getNpcSpot(npc.id, gameStore.hour)
       if (!spot) continue

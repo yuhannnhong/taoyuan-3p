@@ -17,6 +17,8 @@ export interface NpcDef {
   dialogues: Record<FriendshipLevel, string[]>
   /** 是否可以结婚 */
   marriageable?: boolean
+  /** 是否在村莊列表中隱藏 */
+  hidden?: boolean
   /** 关联的心事件ID列表 */
   heartEventIds?: string[]
   /** 约会阶段专属对话 */
